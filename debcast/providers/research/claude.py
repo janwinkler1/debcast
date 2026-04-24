@@ -88,10 +88,8 @@ class ClaudeResearchProvider:
         return CON_TEMPLATE.format(topic=topic, n=n)
 
     def _parse_response(self, response: anthropic.types.Message) -> list[Argument]:
-        text_block = next(
-            (block for block in response.content if block.type == "text"),
-            None,
-        )
+        text_blocks = [block for block in response.content if block.type == "text"]
+        text_block = text_blocks[-1] if text_blocks else None
         if not text_block:
             return []
 
