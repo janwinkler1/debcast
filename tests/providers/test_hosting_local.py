@@ -1,8 +1,18 @@
+import json
+
 from debcast.providers.hosting.local import LocalHostingProvider, _slugify
-from debcast.types import AudioArtifact, Episode
+from debcast.types import AudioArtifact, Episode, Script, Turn
 
 
-def make_episode(title: str = "Nuclear Energy") -> Episode:
+def make_episode(title: str = "Nuclear Energy", with_script: bool = False) -> Episode:
+    script = (
+        Script(
+            topic=title,
+            turns=(Turn(speaker="A", text="Hello"), Turn(speaker="B", text="Hi")),
+        )
+        if with_script
+        else None
+    )
     return Episode(
         title=title,
         audio=AudioArtifact(
@@ -12,6 +22,7 @@ def make_episode(title: str = "Nuclear Energy") -> Episode:
         ),
         description="A debate about nuclear energy.",
         sources=["https://example.com"],
+        script=script,
     )
 
 
@@ -21,11 +32,45 @@ def test_publish_writes_audio_file(tmp_path):
         rss_path=str(tmp_path / "feed.xml"),
     )
     result = provider.publish(make_episode())
-    mp3_files = list((tmp_path / "episodes").glob("*.mp3"))
+    mp3_files = list((tmp_path / "episodes").glob("**/*.mp3"))
     assert len(mp3_files) == 1
     assert mp3_files[0].read_bytes() == make_episode().audio.data
     assert result.local_path is not None
     assert result.feed_url.endswith("feed.xml")
+
+
+def test_publish_creates_episode_dir(tmp_path):
+    provider = LocalHostingProvider(
+        output_dir=str(tmp_path / "episodes"),
+        rss_path=str(tmp_path / "feed.xml"),
+    )
+    result = provider.publish(make_episode())
+    episode_dirs = [p for p in (tmp_path / "episodes").iterdir() if p.is_dir()]
+    assert len(episode_dirs) == 1
+    assert result.local_path == str(episode_dirs[0])
+
+
+def test_publish_writes_script_json(tmp_path):
+    provider = LocalHostingProvider(
+        output_dir=str(tmp_path / "episodes"),
+        rss_path=str(tmp_path / "feed.xml"),
+    )
+    provider.publish(make_episode(with_script=True))
+    script_files = list((tmp_path / "episodes").glob("**/script.json"))
+    assert len(script_files) == 1
+    data = json.loads(script_files[0].read_text())
+    assert data["topic"] == "Nuclear Energy"
+    assert len(data["turns"]) == 2
+
+
+def test_publish_no_script_json_when_no_script(tmp_path):
+    provider = LocalHostingProvider(
+        output_dir=str(tmp_path / "episodes"),
+        rss_path=str(tmp_path / "feed.xml"),
+    )
+    provider.publish(make_episode(with_script=False))
+    script_files = list((tmp_path / "episodes").glob("**/script.json"))
+    assert len(script_files) == 0
 
 
 def test_publish_creates_rss(tmp_path):
