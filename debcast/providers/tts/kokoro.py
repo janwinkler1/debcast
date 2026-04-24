@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from debcast.types import AudioArtifact, Script
 from debcast.utils.audio import pcm_to_mp3, stitch_audio_segments
 
 VOICE_A = "af_bella"
 VOICE_B = "am_adam"
+
+_DEBCAST_DIR = Path.home() / ".debcast"
 
 
 class KokoroTTSProvider:
@@ -13,9 +17,11 @@ class KokoroTTSProvider:
             from kokoro_onnx import Kokoro
         except ImportError:
             raise ImportError(
-                "kokoro-onnx is not installed. Install with: pip install debcast[kokoro]"
+                "kokoro-onnx is not installed. Install with: uv sync --extra kokoro"
             )
-        self._kokoro = Kokoro("kokoro-v0_19.onnx", "voices.bin")
+        model_path = _DEBCAST_DIR / "kokoro-v0_19.onnx"
+        voices_path = _DEBCAST_DIR / "voices.bin"
+        self._kokoro = Kokoro(str(model_path), str(voices_path))
 
     def synthesize(self, script: Script) -> AudioArtifact:
         import numpy as np
