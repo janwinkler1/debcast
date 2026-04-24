@@ -4,7 +4,28 @@ version = "0.1.0"
 description = "AI-generated debate podcasts from any topic"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "anthropic>=0.40",
+    "google-genai>=0.8",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "pydub>=0.25",
+    "requests>=2.32",
+    "rich>=13",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+elevenlabs = ["elevenlabs>=1.0"]
+google-cloud-tts = ["google-cloud-texttospeech>=2.0"]
+kokoro = ["kokoro-onnx>=0.3", "numpy>=1.24"]
+
+[project.scripts]
+debcast = "debcast.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
@@ -16,6 +37,12 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "integration: tests that call external services and require configured API keys",
+]
+filterwarnings = [
+    "ignore:'_UnionGenericAlias' is deprecated and slated for removal in Python 3.17:DeprecationWarning:google.genai.types",
+]
 
 [tool.ruff.lint]
 select = ["I"]

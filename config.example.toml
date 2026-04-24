@@ -1,0 +1,28 @@
+# ~/.debcast/config.toml
+
+[providers]
+tts      = "gemini"       # gemini | google_cloud | elevenlabs | kokoro
+hosting  = "podclaw"      # podclaw | local
+
+[research]
+rounds = 3                # number of research exchange rounds (1–10)
+
+[anthropic]
+api_key = "sk-ant-..."    # required for research and script generation
+
+[gemini]
+api_key = ""              # optional; falls back to GOOGLE_API_KEY env var
+
+[elevenlabs]
+api_key = ""              # only needed if tts = "elevenlabs"
+
+[google_cloud]
+credentials_path = "~/.config/gcloud/application_default_credentials.json"
+
+[podclaw]
+api_key = ""
+show_id = 0
+
+[local]
+output_dir = "~/debcast-episodes"
+rss_path   = "~/debcast-episodes/feed.xml"
