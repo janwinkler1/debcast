@@ -8,16 +8,16 @@ debcast --lucky
 debcast "remote work" --dry-run
 ```
 
----
+______________________________________________________________________
 
 ## What it does
 
 1. **Researches** the topic by crawling the web for arguments on both sides
-2. **Generates** a ~15 min two-host debate script (Host A = pro, Host B = con)
-3. **Synthesizes** audio with two distinct TTS voices
-4. **Publishes** to a podcast feed you can subscribe to on any podcast app
+1. **Generates** a ~15 min two-host debate script (Host A = pro, Host B = con)
+1. **Synthesizes** audio with two distinct TTS voices
+1. **Publishes** to a podcast feed you can subscribe to on any podcast app
 
----
+______________________________________________________________________
 
 ## Architecture
 
@@ -97,22 +97,24 @@ class Episode:
     sources: list[str]
 ```
 
----
+______________________________________________________________________
 
 ## Supported providers
 
-| Stage      | Provider         | Free tier         | Notes                        |
+| Stage | Provider | Free tier | Notes |
 |------------|-----------------|-------------------|------------------------------|
-| Research   | Claude (Anthropic) | via API key     | web search tool built in     |
-| Script     | Claude (Anthropic) | via API key     | only supported provider      |
-| TTS        | Gemini 2.5 TTS   | generous free tier | two-speaker mode, default   |
-| TTS        | Google Cloud TTS | 1M chars/month    | WaveNet voices               |
-| TTS        | ElevenLabs       | 10K chars/month   | best quality, limited free   |
-| TTS        | Kokoro           | free, local       | runs on CPU, no API key      |
-| Hosting    | PodClaw          | 1 show, unlimited episodes | RSS → Apple/Spotify |
-| Hosting    | local            | free              | writes RSS file to disk      |
+| Research | Claude (Anthropic) | via API key | web search tool built in |
+| Research | Tavily | 1000 req/month | good for pure retrieval |
+| Script | Claude (Anthropic) | via API key | default, best quality |
+| Script | OpenAI | via API key | drop-in alternative |
+| TTS | Gemini 2.5 TTS | generous free tier | two-speaker mode, default |
+| TTS | Google Cloud TTS | 1M chars/month | WaveNet voices |
+| TTS | ElevenLabs | 10K chars/month | best quality, limited free |
+| TTS | Kokoro | free, local | runs on CPU, no API key |
+| Hosting | PodClaw | 1 show, unlimited episodes | RSS → Apple/Spotify |
+| Hosting | local | free | writes RSS file to disk |
 
----
+______________________________________________________________________
 
 ## Project structure
 
@@ -151,7 +153,7 @@ debcast/
         └── test_tts_gemini.py
 ```
 
----
+______________________________________________________________________
 
 ## Config
 
@@ -183,7 +185,7 @@ output_dir = "~/debcast-episodes"
 rss_path   = "~/debcast-episodes/feed.xml"
 ```
 
----
+______________________________________________________________________
 
 ## CLI
 
@@ -205,7 +207,7 @@ debcast "AI regulation" --research-rounds 5
 debcast --list
 ```
 
----
+______________________________________________________________________
 
 ## Development setup
 
@@ -227,19 +229,19 @@ $EDITOR ~/.debcast/config.toml
 uv run debcast --lucky
 ```
 
----
+______________________________________________________________________
 
 ## Adding a new provider
 
 1. Create the file under the appropriate `providers/` subdirectory
-2. Implement the corresponding `Protocol` from `debcast/types.py`
-3. Add the provider key to the `config.py` enum
-4. Wire it up in `pipeline.py`
-5. Add a test under `tests/providers/`
+1. Implement the corresponding `Protocol` from `debcast/types.py`
+1. Add the provider key to the `config.py` enum
+1. Wire it up in `pipeline.py`
+1. Add a test under `tests/providers/`
 
 No changes needed anywhere else.
 
----
+______________________________________________________________________
 
 ## Testing
 
@@ -251,7 +253,43 @@ uv run pytest -k "not integration"    # skip tests that hit real APIs
 
 Providers are tested with mocks. Integration tests (hitting real APIs) are marked `@pytest.mark.integration` and skipped by default.
 
----
+______________________________________________________________________
+
+## Code quality
+
+```bash
+uv run ruff format .                                  # format
+uv run ruff check . --fix                             # lint + autofix
+uv run ruff format --check . && uv run ruff check .   # what CI runs
+uv run mdformat README.md CLAUDE.md                   # format markdown
+uv run mdformat --check README.md CLAUDE.md           # what CI runs
+```
+
+______________________________________________________________________
+
+## GitHub workflow
+
+Use `gh` to track work and open PRs. Create an issue before starting implementation, then open a PR that closes it.
+
+```bash
+# create an issue
+gh issue create --title "short title" --body "description"
+
+# create a PR from current branch targeting main
+gh pr create --title "short title" --body "$(cat <<'EOF'
+## Summary
+- what changed and why
+
+Closes #<issue-number>
+EOF
+)"
+
+# list open issues / PRs
+gh issue list
+gh pr list
+```
+
+______________________________________________________________________
 
 ## Non-goals
 
@@ -260,7 +298,7 @@ Providers are tested with mocks. Integration tests (hitting real APIs) are marke
 - No async — pipeline is sequential, complexity not worth it
 - No audio editing beyond stitching — what TTS gives you is what you get
 
----
+______________________________________________________________________
 
 ## Status
 

@@ -5,3 +5,16 @@ description = "AI-generated debate podcasts from any topic"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff==0.15.11",
+    "mdformat==1.0.0",
+    "pytest==9.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+select = ["I"]
