@@ -2,13 +2,13 @@
 
 [providers]
 tts      = "gemini"       # gemini | google_cloud | elevenlabs | kokoro
-hosting  = "podclaw"      # podclaw | local
+hosting  = "local"        # local | podclaw
 
 [research]
 rounds = 3                # number of research exchange rounds (1–10)
 
 [anthropic]
-api_key = "sk-ant-..."    # required for research and script generation
+api_key = ""              # required for research and script generation
 
 [gemini]
 api_key = ""              # optional; falls back to GOOGLE_API_KEY env var
