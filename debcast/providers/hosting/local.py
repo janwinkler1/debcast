@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
+import json
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -19,16 +21,25 @@ class LocalHostingProvider:
 
         slug = _slugify(episode.title)
         date_str = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+        episode_dir = self._output_dir / f"{slug}-{date_str}"
+        episode_dir.mkdir(parents=True, exist_ok=True)
+
         ext = episode.audio.format
-        filename = f"{slug}-{date_str}.{ext}"
-        audio_path = self._output_dir / filename
+        audio_path = episode_dir / f"{slug}-{date_str}.{ext}"
         audio_path.write_bytes(episode.audio.data)
+
+        if episode.script is not None:
+            script_path = episode_dir / "script.json"
+            script_path.write_text(
+                json.dumps(dataclasses.asdict(episode.script), indent=2),
+                encoding="utf-8",
+            )
 
         self._upsert_rss(episode, audio_path)
         return PublishResult(
             feed_url=str(self._rss_path),
             episode_url=audio_path.as_uri(),
-            local_path=str(audio_path),
+            local_path=str(episode_dir),
         )
 
     def _upsert_rss(self, episode: Episode, audio_path: Path) -> None:
