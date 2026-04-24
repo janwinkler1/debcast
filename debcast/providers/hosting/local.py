@@ -22,7 +22,7 @@ class LocalHostingProvider:
         slug = _slugify(episode.title)
         date_str = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         episode_dir = self._output_dir / f"{slug}-{date_str}"
-        episode_dir.mkdir(parents=True, exist_ok=True)
+        episode_dir.mkdir(parents=True, exist_ok=False)
 
         ext = episode.audio.format
         audio_path = episode_dir / f"{slug}-{date_str}.{ext}"
