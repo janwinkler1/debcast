@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import shutil
 from typing import TYPE_CHECKING
 
 from debcast.types import AudioArtifact
@@ -14,6 +15,7 @@ PAUSE_MS = 500
 def stitch_audio_segments(segments: list[AudioArtifact]) -> AudioArtifact:
     if not segments:
         raise ValueError("No audio segments to stitch")
+    _ensure_audio_converter()
     audio_segment = _audio_segment_class()
     combined = audio_segment.empty()
     pause = audio_segment.silent(duration=PAUSE_MS)
@@ -30,6 +32,7 @@ def stitch_audio_segments(segments: list[AudioArtifact]) -> AudioArtifact:
 def pcm_to_mp3(
     pcm_data: bytes, sample_rate: int = 24000, channels: int = 1
 ) -> AudioArtifact:
+    _ensure_audio_converter()
     audio_segment = _audio_segment_class()
     seg = audio_segment(
         data=pcm_data,
@@ -43,6 +46,7 @@ def pcm_to_mp3(
 
 
 def wav_to_mp3(wav_data: bytes) -> AudioArtifact:
+    _ensure_audio_converter()
     audio_segment = _audio_segment_class()
     seg = audio_segment.from_wav(io.BytesIO(wav_data))
     buf = io.BytesIO()
@@ -54,6 +58,7 @@ def _load_segment(artifact: AudioArtifact) -> AudioSegment:
     if artifact.format not in {"mp3", "wav"}:
         raise ValueError(f"Unsupported audio format for stitching: {artifact.format!r}")
 
+    _ensure_audio_converter()
     audio_segment = _audio_segment_class()
     buf = io.BytesIO(artifact.data)
     if artifact.format == "mp3":
@@ -67,3 +72,12 @@ def _audio_segment_class() -> type[AudioSegment]:
     from pydub import AudioSegment
 
     return AudioSegment
+
+
+def _ensure_audio_converter() -> None:
+    if shutil.which("ffmpeg") or shutil.which("avconv"):
+        return
+    raise RuntimeError(
+        "ffmpeg is required for MP3 audio conversion. Install it with "
+        "`sudo apt-get install ffmpeg` or `brew install ffmpeg`."
+    )
