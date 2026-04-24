@@ -43,6 +43,14 @@ def test_parse_strips_markdown_fences():
     assert len(script.turns) == 1
 
 
+def test_parse_extracts_json_array_from_wrapped_text():
+    turns = [{"speaker": "A", "text": "intro"}]
+    raw = f"Here is your script:\n{json.dumps(turns)}\nThanks!"
+    provider = ClaudeScriptProvider.__new__(ClaudeScriptProvider)
+    script = provider._parse_script("topic", raw)
+    assert len(script.turns) == 1
+
+
 def test_parse_filters_invalid_speakers():
     turns = [
         {"speaker": "A", "text": "valid"},

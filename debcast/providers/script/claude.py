@@ -72,7 +72,15 @@ class ClaudeScriptProvider:
 
     def _parse_script(self, topic: str, raw: str) -> Script:
         text = re.sub(r"```(?:json)?\n?", "", raw).strip()
-        data = json.loads(text)
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            match = re.search(r"\[.*\]", text, re.DOTALL)
+            if not match:
+                raise ValueError(
+                    f"Script response did not contain a JSON array:\n{raw[:500]}"
+                )
+            data = json.loads(match.group())
         turns = tuple(
             Turn(speaker=item["speaker"], text=item["text"])
             for item in data

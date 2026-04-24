@@ -36,6 +36,14 @@ class LocalHostingProvider:
             tree = ET.parse(self._rss_path)
             root = tree.getroot()
             channel = root.find("channel")
+            if channel is None:
+                channel = ET.SubElement(root, "channel")
+                ET.SubElement(channel, "title").text = "debcast"
+                ET.SubElement(
+                    channel, "description"
+                ).text = "AI-generated debate podcasts"
+                ET.SubElement(channel, "link").text = "http://localhost"
+                ET.SubElement(channel, "language").text = "en-us"
         else:
             root = ET.Element("rss", version="2.0")
             root.set("xmlns:itunes", "http://www.itunes.com/dtds/podcast-1.0.dtd")
@@ -71,4 +79,5 @@ def _slugify(title: str) -> str:
     title = title.lower()
     title = re.sub(r"[^\w\s-]", "", title)
     title = re.sub(r"[\s_-]+", "-", title)
-    return title.strip("-")[:60]
+    slug = title.strip("-")[:60]
+    return slug or "episode"
