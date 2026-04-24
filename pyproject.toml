@@ -10,6 +10,7 @@ dependencies = [
     "google-genai>=0.8",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
+    "audioop-lts>=0.2",
     "pydub>=0.25",
     "requests>=2.32",
     "rich>=13",
