@@ -24,10 +24,26 @@ debcast "remote work" --dry-run
 The pipeline is intentionally linear and each stage is independently testable:
 
 ```
-TopicResolver → ResearchAgent → ScriptGenerator → TTSEngine → Publisher
+TopicResolver → ResearchLoop → ScriptGenerator → TTSEngine → Publisher
 ```
 
 Each stage communicates via a typed intermediate — no globals, no shared state.
+
+### Research loop
+
+Research runs as a synced loop of N rounds. Both sides research independently each round, then exchange results so the next round targets counter-arguments:
+
+```
+Round 1:  pro.research(topic)               con.research(topic)
+               ↓                                     ↓
+Round 2:  pro.research(counter_to=con[1])   con.research(counter_to=pro[1])
+               ↓                                     ↓
+          ...repeat N times...
+               ↓
+          ResearchResult (all rounds merged)
+```
+
+`N` is controlled by `research_rounds` in config (default 3). The accumulated arguments across all rounds feed into script generation, giving the debate genuine depth and back-and-forth.
 
 ### Provider abstraction
 
@@ -35,7 +51,12 @@ Every external dependency is behind a `Protocol`. TTS and hosting providers are 
 
 ```python
 class ResearchProvider(Protocol):
-    def research(self, topic: str) -> ResearchResult: ...
+    def research(
+        self,
+        topic: str,
+        stance: Literal["pro", "con"],
+        counter_to: list[Argument] | None = None,  # opponent's prior-round arguments
+    ) -> list[Argument]: ...
 
 class ScriptProvider(Protocol):
     def generate(self, research: ResearchResult) -> Script: ...
@@ -51,9 +72,16 @@ class HostingProvider(Protocol):
 
 ```python
 @dataclass
+class ResearchRound:
+    round: int
+    pro: list[Argument]      # each has text + source URL
+    con: list[Argument]
+
+@dataclass
 class ResearchResult:
     topic: str
-    pro: list[Argument]      # each has text + source URL
+    rounds: list[ResearchRound]
+    pro: list[Argument]      # flattened across all rounds
     con: list[Argument]
 
 @dataclass
@@ -98,7 +126,8 @@ debcast/
 │   ├── cli.py               # Typer app, entry point
 │   ├── config.py            # Pydantic settings, reads ~/.debcast/config.toml
 │   ├── pipeline.py          # orchestrates the stages in order
-│   ├── types.py             # ResearchResult, Script, Episode, Turn, Argument
+│   ├── research_loop.py     # synced N-round research loop
+│   ├── types.py             # ResearchResult, ResearchRound, Script, Episode, Turn, Argument
 │   ├── providers/
 │   │   ├── __init__.py
 │   │   ├── research/
@@ -133,6 +162,9 @@ Place at `~/.debcast/config.toml`:
 tts      = "gemini"       # gemini | google_cloud | elevenlabs | kokoro
 hosting  = "podclaw"      # podclaw | local
 
+[research]
+rounds = 3                # number of pro/con exchange rounds
+
 [anthropic]
 api_key = "sk-ant-..."
 
@@ -165,8 +197,9 @@ debcast --lucky
 # print script only, no audio, no publish
 debcast "veganism" --dry-run
 
-# override TTS or hosting for one run
+# override provider or research depth for one run
 debcast "AI regulation" --tts elevenlabs --hosting local
+debcast "AI regulation" --research-rounds 5
 
 # list recent episodes
 debcast --list
