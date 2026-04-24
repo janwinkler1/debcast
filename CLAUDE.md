@@ -1,6 +1,6 @@
 # debcast
 
-AI-generated debate podcasts from any topic. Two hosts, pro vs con, auto-published to a listenable feed. CLI-first, model-agnostic.
+AI-generated debate podcasts from any topic. Two hosts, pro vs con, auto-published to a listenable feed. CLI-first.
 
 ```bash
 debcast "nuclear energy"
@@ -31,7 +31,7 @@ Each stage communicates via a typed intermediate — no globals, no shared state
 
 ### Provider abstraction
 
-Every external dependency is behind a `Protocol`. Swap providers by changing `~/.debcast/config.toml`, no code changes needed.
+Every external dependency is behind a `Protocol`. TTS and hosting providers are configurable; research and script generation always use Claude.
 
 ```python
 class ResearchProvider(Protocol):
@@ -76,9 +76,7 @@ class Episode:
 | Stage      | Provider         | Free tier         | Notes                        |
 |------------|-----------------|-------------------|------------------------------|
 | Research   | Claude (Anthropic) | via API key     | web search tool built in     |
-| Research   | Tavily           | 1000 req/month    | good for pure retrieval      |
-| Script     | Claude (Anthropic) | via API key     | default, best quality        |
-| Script     | OpenAI           | via API key       | drop-in alternative          |
+| Script     | Claude (Anthropic) | via API key     | only supported provider      |
 | TTS        | Gemini 2.5 TTS   | generous free tier | two-speaker mode, default   |
 | TTS        | Google Cloud TTS | 1M chars/month    | WaveNet voices               |
 | TTS        | ElevenLabs       | 10K chars/month   | best quality, limited free   |
@@ -104,11 +102,9 @@ debcast/
 │   ├── providers/
 │   │   ├── __init__.py
 │   │   ├── research/
-│   │   │   ├── claude.py
-│   │   │   └── tavily.py
+│   │   │   └── claude.py
 │   │   ├── script/
-│   │   │   ├── claude.py
-│   │   │   └── openai.py
+│   │   │   └── claude.py
 │   │   ├── tts/
 │   │   │   ├── gemini.py
 │   │   │   ├── google_cloud.py
@@ -134,19 +130,11 @@ Place at `~/.debcast/config.toml`:
 
 ```toml
 [providers]
-research = "claude"       # claude | tavily
-script   = "claude"       # claude | openai
 tts      = "gemini"       # gemini | google_cloud | elevenlabs | kokoro
 hosting  = "podclaw"      # podclaw | local
 
 [anthropic]
 api_key = "sk-ant-..."
-
-[openai]
-api_key = "sk-..."        # only needed if script = "openai"
-
-[tavily]
-api_key = "tvly-..."      # only needed if research = "tavily"
 
 [elevenlabs]
 api_key = "..."           # only needed if tts = "elevenlabs"
@@ -177,7 +165,7 @@ debcast --lucky
 # print script only, no audio, no publish
 debcast "veganism" --dry-run
 
-# override provider for one run
+# override TTS or hosting for one run
 debcast "AI regulation" --tts elevenlabs --hosting local
 
 # list recent episodes
