@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from debcast.types import Argument, ResearchProvider, ResearchResult, ResearchRound
 
 
@@ -7,6 +9,7 @@ def run_research_loop(
     topic: str,
     provider: ResearchProvider,
     rounds: int,
+    on_progress: Callable[[str], None] | None = None,
 ) -> ResearchResult:
     if rounds < 1:
         raise ValueError(f"rounds must be >= 1, got {rounds}")
@@ -16,11 +19,15 @@ def run_research_loop(
     prev_con: list[Argument] = []
 
     for i in range(1, rounds + 1):
+        if on_progress:
+            on_progress(f"Research round {i}/{rounds} — pro…")
         pro_args = provider.research(
             topic=topic,
             stance="pro",
             counter_to=prev_con if prev_con else None,
         )
+        if on_progress:
+            on_progress(f"Research round {i}/{rounds} — con…")
         con_args = provider.research(
             topic=topic,
             stance="con",

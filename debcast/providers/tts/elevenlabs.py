@@ -5,8 +5,8 @@ from elevenlabs import ElevenLabs
 from debcast.types import AudioArtifact, Script
 from debcast.utils.audio import stitch_audio_segments
 
-VOICE_ID_A = "21m00Tcm4TlvDq8ikWAM"
-VOICE_ID_B = "AZnzlk1XvdvUeBnXmlld"
+VOICE_ID_A = "zGjIP4SZlMnY9m93k97r"  # Hope
+VOICE_ID_B = "6fZce9LFNG3iEITDfqZZ"  # Charlotte
 MODEL_ID = "eleven_multilingual_v2"
 
 

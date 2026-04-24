@@ -30,12 +30,12 @@ def run(options: RunOptions, cfg: Config) -> str:
     research_provider = _build_research_provider(cfg)
     script_provider = _build_script_provider(cfg)
 
-    with _spinner(f"Researching '{options.topic}' ({rounds} rounds)…"):
-        research = run_research_loop(
-            topic=options.topic,
-            provider=research_provider,
-            rounds=rounds,
-        )
+    research = run_research_loop(
+        topic=options.topic,
+        provider=research_provider,
+        rounds=rounds,
+        on_progress=lambda msg: console.print(f"[dim]  {msg}[/dim]"),
+    )
     console.print(
         f"[green]✓[/green] Research complete — {len(research.pro)} pro args, "
         f"{len(research.con)} con args"
