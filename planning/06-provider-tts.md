@@ -1,6 +1,7 @@
 # Implementation Plan: TTS Providers
 
 **Files:**
+
 - `debcast/providers/tts/gemini.py` (default)
 - `debcast/providers/tts/google_cloud.py`
 - `debcast/providers/tts/elevenlabs.py`
@@ -9,7 +10,7 @@
 
 All `TTSProvider` implementations return an `AudioArtifact(data, mime_type, format)`. The hosting providers and audio utilities use `mime_type`/`format` to handle the bytes correctly.
 
----
+______________________________________________________________________
 
 ## Audio utilities
 
@@ -73,7 +74,7 @@ def _load_segment(artifact: AudioArtifact) -> AudioSegment:
 
 `pydub` requires `ffmpeg` on the system path for MP3 encoding/decoding. Document in README.
 
----
+______________________________________________________________________
 
 ## Gemini 2.5 TTS (default)
 
@@ -156,7 +157,7 @@ class GeminiTTSProvider:
 
 **SDK note**: `google-genai` is the replacement for `google-generativeai`. Import path is `from google import genai`. The `genai.Client` constructor accepts `api_key` directly; if `None`, the SDK reads `GOOGLE_API_KEY` from the environment. Verify the exact `types.*` class names against the installed SDK version before implementing — the preview API surface may shift.
 
----
+______________________________________________________________________
 
 ## Google Cloud TTS
 
@@ -216,7 +217,7 @@ class GoogleCloudTTSProvider:
         return stitch_audio_segments(segments)
 ```
 
----
+______________________________________________________________________
 
 ## ElevenLabs TTS
 
@@ -260,7 +261,7 @@ class ElevenLabsTTSProvider:
 
 **Cost note:** ElevenLabs free tier is 10K chars/month. A 15-min script (~15K chars) exceeds that.
 
----
+______________________________________________________________________
 
 ## Kokoro (local, CPU)
 
@@ -299,7 +300,7 @@ class KokoroTTSProvider:
         return stitch_audio_segments(segments)
 ```
 
----
+______________________________________________________________________
 
 ## Test plan
 

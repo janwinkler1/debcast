@@ -1,11 +1,12 @@
 # Implementation Plan: Project Setup
 
 **Files:**
+
 - `pyproject.toml`
 - `debcast/__init__.py`
 - `debcast/providers/__init__.py` (and sub-package inits)
 
----
+______________________________________________________________________
 
 ## pyproject.toml
 
@@ -68,7 +69,7 @@ target-version = "py314"
 select = ["E", "F", "I"]
 ```
 
----
+______________________________________________________________________
 
 ## main.py
 
@@ -85,7 +86,7 @@ select = ["E", "F", "I"]
 __version__ = "0.1.0"
 ```
 
----
+______________________________________________________________________
 
 ## Provider __init__ files
 
@@ -102,13 +103,14 @@ tests/__init__.py                       # empty
 tests/providers/__init__.py             # empty
 ```
 
----
+______________________________________________________________________
 
 ## System dependencies
 
 `pydub` requires `ffmpeg` to be installed on the system path for MP3 encoding/decoding.
 
 Installation:
+
 ```bash
 # macOS
 brew install ffmpeg
@@ -121,13 +123,14 @@ sudo apt-get install ffmpeg
 ```
 
 **Kokoro** additionally requires model files:
+
 ```bash
 # Download model files to project root or a known path
 wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/kokoro-v0_19.onnx
 wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/voices.bin
 ```
 
----
+______________________________________________________________________
 
 ## Development setup
 
@@ -160,16 +163,17 @@ uv run pytest
 uv run debcast "nuclear energy"
 ```
 
----
+______________________________________________________________________
 
 ## Python version requirement
 
 `>=3.14` as set in the existing `pyproject.toml`. All modern Python features are available:
+
 - `tomllib` in stdlib (since 3.11)
 - `str | None` union syntax (since 3.10)
 - `from __future__ import annotations` is no longer needed but harmless to include
 
----
+______________________________________________________________________
 
 ## .gitignore additions
 

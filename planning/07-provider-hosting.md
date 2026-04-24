@@ -1,12 +1,13 @@
 # Implementation Plan: Hosting Providers
 
 **Files:**
+
 - `debcast/providers/hosting/local.py`
 - `debcast/providers/hosting/podclaw.py`
 
 Both implement `HostingProvider.publish(episode: Episode) -> PublishResult`.
 
----
+______________________________________________________________________
 
 ## Local hosting
 
@@ -17,10 +18,12 @@ Writes the audio file to a local directory and maintains an RSS 2.0 feed XML fil
 ### Honest scope
 
 Local hosting is primarily a **dev and quality verification tool**. The output — an RSS file with `file://` enclosure URLs — can be opened directly in players like VLC, but **will not work with standard podcast apps** (Apple Podcasts, Spotify, Overcast, etc.) because:
+
 - `file://` URLs are not network-accessible
 - Podcast apps require HTTP(S) feeds
 
 For a quick podcast-app test, serve the output directory over HTTP:
+
 ```bash
 cd ~/debcast-episodes && python -m http.server 8080
 # Then subscribe to: http://localhost:8080/feed.xml
@@ -129,99 +132,59 @@ def _slugify(title: str) -> str:
     return title.strip("-")[:60]
 ```
 
----
+______________________________________________________________________
 
 ## PodClaw hosting
 
 **File:** `debcast/providers/hosting/podclaw.py`
 
-PodClaw's API accepts episode metadata as JSON with a pre-existing `audio_url`. It does **not** accept raw audio file uploads in the episode-create request. The workflow is therefore two-step:
+PodClaw's current API accepts episode metadata as JSON with a pre-existing
+public `audio_url`. It does **not** accept raw audio bytes in the publish
+request. Debcast therefore supports three inputs:
 
-1. **Upload audio** to PodClaw's file storage endpoint → get back an `audio_url`
-2. **Create episode** via JSON with that `audio_url`
+1. `Episode.audio_url` is already set by an upstream step.
+1. `podclaw.audio_output_dir` and `podclaw.audio_base_url` are configured, so
+   debcast writes the generated audio file locally and derives
+   `audio_base_url/<filename>`.
+1. `podclaw.s3_bucket` and `podclaw.audio_base_url` are configured, so debcast
+   uploads the generated audio to S3-compatible storage and derives
+   `audio_base_url/<object-key>`.
+
+If only `audio_output_dir` is configured, the user is responsible for serving or
+syncing it at `audio_base_url` before podcast apps fetch the RSS enclosure.
 
 ```
-Step 1: POST /api/v1/shows/{show_id}/audio
-  Authorization: Bearer {api_key}
-  Content-Type: multipart/form-data
-  file: <MP3 bytes>
-  → Response: {"audio_url": "https://cdn.podclaw.com/shows/1/episodes/abc123.mp3"}
-
-Step 2: POST /api/v1/shows/{show_id}/episodes
+POST https://podclaw.io/api/episodes/publish
   Authorization: Bearer {api_key}
   Content-Type: application/json
-  Body: {"title": "...", "description": "...", "audio_url": "..."}
-  → Response: {"episode_id": 123, "episode_url": "...", "feed_url": "https://podclaw.com/shows/1/feed.xml"}
+  Body: {
+    "show_id": 1,
+    "title": "...",
+    "description": "...",
+    "audio_url": "https://cdn.example.com/episode.mp3"
+  }
+  → Response: {
+    "episode": {"id": 42, "status": "published"},
+    "feed_url": "https://podclaw.io/api/shows/1/feed"
+  }
 ```
 
-**Important:** The endpoint paths, field names, and response schema above are approximations. Verify against the actual PodClaw API documentation before implementing. Specifically confirm:
-- Does PodClaw have a dedicated audio-upload endpoint, or does it require external storage (e.g. S3)?
-- Exact field names in the episode-create body
-- Whether `feed_url` is returned per-episode or is a fixed show URL
+Verified against PodClaw's public docs on 2026-04-24:
 
-```python
-from __future__ import annotations
-import io
-import requests
+- Publish endpoint: `POST /api/episodes/publish`
+- Request fields: `show_id`, `audio_url`, `title`, optional `description`
+- Response includes `feed_url`
 
-from debcast.types import AudioArtifact, Episode, PublishResult
+Implementation notes:
 
+- `PodClawHostingProvider.publish()` resolves a public audio URL, posts to
+  `/api/episodes/publish`, and returns `PublishResult(feed_url, episode_url)`.
+- If audio is staged locally for a public CDN/static host, `local_path` is set
+  to the staged file path for troubleshooting.
+- Unit tests mock HTTP calls; real PodClaw calls belong in integration tests
+  guarded by API-key secrets.
 
-PODCLAW_BASE_URL = "https://api.podclaw.com"
-
-
-class PodClawHostingProvider:
-    def __init__(self, api_key: str, show_id: int) -> None:
-        if not api_key:
-            raise ValueError("podclaw.api_key is required when hosting = 'podclaw'")
-        if not show_id:
-            raise ValueError("podclaw.show_id is required when hosting = 'podclaw'")
-        self._api_key = api_key
-        self._show_id = show_id
-        self._headers = {"Authorization": f"Bearer {self._api_key}"}
-
-    def publish(self, episode: Episode) -> PublishResult:
-        audio_url = self._upload_audio(episode.audio)
-        return self._create_episode(episode, audio_url)
-
-    def _upload_audio(self, audio: AudioArtifact) -> str:
-        """Upload audio file, return the hosted URL."""
-        resp = requests.post(
-            f"{PODCLAW_BASE_URL}/api/v1/shows/{self._show_id}/audio",
-            headers=self._headers,
-            files={
-                "file": (
-                    f"episode.{audio.format}",
-                    io.BytesIO(audio.data),
-                    audio.mime_type,
-                )
-            },
-            timeout=120,
-        )
-        resp.raise_for_status()
-        return resp.json()["audio_url"]
-
-    def _create_episode(self, episode: Episode, audio_url: str) -> PublishResult:
-        """Create the episode record with metadata and the uploaded audio URL."""
-        resp = requests.post(
-            f"{PODCLAW_BASE_URL}/api/v1/shows/{self._show_id}/episodes",
-            headers={**self._headers, "Content-Type": "application/json"},
-            json={
-                "title": episode.title,
-                "description": episode.description,
-                "audio_url": audio_url,
-            },
-            timeout=30,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        return PublishResult(
-            feed_url=data["feed_url"],
-            episode_url=data.get("episode_url", audio_url),
-        )
-```
-
----
+______________________________________________________________________
 
 ## Test plan
 
