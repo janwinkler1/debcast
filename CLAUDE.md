@@ -104,9 +104,7 @@ ______________________________________________________________________
 | Stage | Provider | Free tier | Notes |
 |------------|-----------------|-------------------|------------------------------|
 | Research | Claude (Anthropic) | via API key | web search tool built in |
-| Research | Tavily | 1000 req/month | good for pure retrieval |
-| Script | Claude (Anthropic) | via API key | default, best quality |
-| Script | OpenAI | via API key | drop-in alternative |
+| Script | Claude (Anthropic) | via API key | only supported provider |
 | TTS | Gemini 2.5 TTS | generous free tier | two-speaker mode, default |
 | TTS | Google Cloud TTS | 1M chars/month | WaveNet voices |
 | TTS | ElevenLabs | 10K chars/month | best quality, limited free |
