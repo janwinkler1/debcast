@@ -143,5 +143,13 @@ def _build_hosting_provider(name: str, cfg: Config):
         return PodClawHostingProvider(
             api_key=cfg.podclaw.api_key,
             show_id=cfg.podclaw.show_id,
+            audio_output_dir=cfg.podclaw.audio_output_dir,
+            audio_base_url=cfg.podclaw.audio_base_url,
+            s3_bucket=cfg.podclaw.s3_bucket,
+            s3_prefix=cfg.podclaw.s3_prefix,
+            s3_endpoint_url=cfg.podclaw.s3_endpoint_url,
+            s3_region=cfg.podclaw.s3_region,
+            s3_access_key_id=cfg.podclaw.s3_access_key_id,
+            s3_secret_access_key=cfg.podclaw.s3_secret_access_key,
         )
     raise ValueError(f"Unknown hosting provider: {name!r}")

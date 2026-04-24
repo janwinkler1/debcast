@@ -56,6 +56,14 @@ class GeminiConfig(BaseSettings):
 class PodClawConfig(BaseSettings):
     api_key: str = ""
     show_id: int = 0
+    audio_output_dir: str = ""
+    audio_base_url: str = ""
+    s3_bucket: str = ""
+    s3_prefix: str = ""
+    s3_endpoint_url: str = ""
+    s3_region: str = ""
+    s3_access_key_id: str = ""
+    s3_secret_access_key: str = ""
 
 
 class LocalConfig(BaseSettings):
@@ -127,6 +135,14 @@ credentials_path = "~/.config/gcloud/application_default_credentials.json"
 [podclaw]
 api_key = ""
 show_id = 0
+audio_output_dir = "~/debcast-podclaw-audio"
+audio_base_url = ""
+s3_bucket = ""
+s3_prefix = ""
+s3_endpoint_url = ""
+s3_region = ""
+s3_access_key_id = ""
+s3_secret_access_key = ""
 
 [local]
 output_dir = "~/debcast-episodes"

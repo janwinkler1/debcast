@@ -13,11 +13,13 @@ Build debcast end-to-end: a CLI tool that takes a topic, researches a Pro and Co
 **Unit tests** use mocked providers and run offline. **Integration tests** hit real APIs and run in CI via secrets (see [09-testing-strategy.md](09-testing-strategy.md)).
 
 Already exists:
+
 - `pyproject.toml` (minimal — needs dependencies added, see [10-project-setup.md](10-project-setup.md))
 - `README.md` (minimal — good enough for now)
 - `main.py` (uv scaffold placeholder — replaced by `debcast/cli.py` as the real entry point)
 
 Files to create:
+
 - `config.example.toml`
 - `debcast/__init__.py`
 - `debcast/types.py`
@@ -42,6 +44,7 @@ Files to create:
 Add the full unit test suite covering Phase 1 code (mocked providers), and integration tests for each real provider. CI must pass before Phase 3.
 
 Files produced:
+
 - `tests/__init__.py`
 - `tests/conftest.py`
 - `tests/providers/__init__.py`
@@ -59,6 +62,7 @@ Files produced:
 Wire up PodClaw so episodes can be published to a real podcast feed.
 
 Files produced:
+
 - `debcast/providers/hosting/podclaw.py`
 
 ### Phase 4 — Remaining TTS providers
@@ -66,6 +70,7 @@ Files produced:
 ElevenLabs, Google Cloud TTS, Kokoro. Each is independently shippable.
 
 Files produced:
+
 - `debcast/providers/tts/elevenlabs.py`
 - `debcast/providers/tts/google_cloud.py`
 - `debcast/providers/tts/kokoro.py`

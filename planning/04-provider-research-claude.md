@@ -10,7 +10,7 @@ Implement `ResearchProvider` using the Anthropic API with the built-in `web_sear
 
 ## Complete implementation
 
-```python
+````python
 from __future__ import annotations
 import json
 import re
@@ -133,7 +133,7 @@ class ClaudeResearchProvider:
             )
             arguments.append(Argument(text=item["text"], sources=sources))
         return arguments
-```
+````
 
 ## Design notes
 
@@ -156,7 +156,7 @@ class ClaudeResearchProvider:
 
 ## Test plan
 
-```python
+````python
 # tests/providers/test_research_claude.py
 
 import json
@@ -255,4 +255,4 @@ def test_real_research_call():
     assert len(args) >= 1
     assert all(isinstance(a, Argument) for a in args)
     assert all(isinstance(s, Source) for a in args for s in a.sources)
-```
+````

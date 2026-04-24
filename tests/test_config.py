@@ -10,6 +10,14 @@ def test_defaults_load_without_config_file():
         cfg = Config()
     assert cfg.research.rounds == 3
     assert cfg.anthropic.api_key == ""
+    assert cfg.podclaw.audio_output_dir == ""
+    assert cfg.podclaw.audio_base_url == ""
+    assert cfg.podclaw.s3_bucket == ""
+    assert cfg.podclaw.s3_prefix == ""
+    assert cfg.podclaw.s3_endpoint_url == ""
+    assert cfg.podclaw.s3_region == ""
+    assert cfg.podclaw.s3_access_key_id == ""
+    assert cfg.podclaw.s3_secret_access_key == ""
 
 
 def test_api_key_from_toml(tmp_path):

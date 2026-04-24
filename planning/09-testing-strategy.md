@@ -21,11 +21,13 @@ markers = [
 ```
 
 To run only unit tests locally (when you don't have credentials available):
+
 ```bash
 uv run pytest -m "not integration"
 ```
 
 To run everything (as CI does):
+
 ```bash
 uv run pytest
 ```
@@ -144,6 +146,7 @@ All secrets must be configured in the GitHub repository settings before CI can p
 ## Coverage targets
 
 Focus coverage effort on:
+
 - `research_loop.py`: 100% — pure logic, no excuse
 - `providers/hosting/local.py`: 100% — no API calls, just file I/O
 - `providers/research/claude.py` parsing: 100% — the JSON parsing is the tricky part

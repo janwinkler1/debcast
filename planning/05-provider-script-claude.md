@@ -10,7 +10,7 @@ Take a `ResearchResult` (all accumulated pro/con arguments) and generate a reali
 
 ## Complete implementation
 
-```python
+````python
 from __future__ import annotations
 import json
 import re
@@ -98,7 +98,7 @@ class ClaudeScriptProvider:
         if not turns:
             raise ValueError(f"Script parser got 0 valid turns from response:\n{raw[:500]}")
         return Script(topic=topic, turns=turns)
-```
+````
 
 ## Design notes
 
@@ -112,14 +112,15 @@ class ClaudeScriptProvider:
 ## Prompt strategy
 
 The system prompt asks for JSON array output explicitly. This produces reliable structured output without needing Anthropic's structured output / tool-use JSON mode, which would add complexity. The user prompt includes:
+
 1. Topic
-2. Formatted arguments for each side (with source URLs)
-3. Specific format and length guidelines
-4. Turn count target (20–30 turns ≈ 15 min at ~40 words/turn × 2s/word)
+1. Formatted arguments for each side (with source URLs)
+1. Specific format and length guidelines
+1. Turn count target (20–30 turns ≈ 15 min at ~40 words/turn × 2s/word)
 
 ## Test plan
 
-```python
+````python
 # tests/test_script_generator.py
 
 import json
@@ -206,4 +207,4 @@ def test_real_generation():
     script = provider.generate(research)
     assert len(script.turns) >= 10
     assert script.topic == "nuclear energy"
-```
+````

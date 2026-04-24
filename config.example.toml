@@ -20,8 +20,19 @@ api_key = ""              # only needed if tts = "elevenlabs"
 credentials_path = "~/.config/gcloud/application_default_credentials.json"
 
 [podclaw]
-api_key = ""
-show_id = 0
+api_key  = ""
+show_id  = 0
+# S3-compatible bucket with public access enabled.
+# Cloudflare R2: fill in all fields below.
+# AWS S3: omit s3_endpoint_url; audio_base_url is derived automatically.
+s3_bucket        = ""
+s3_endpoint_url  = ""      # R2: https://<account-id>.r2.cloudflarestorage.com
+s3_region        = "auto"  # R2: "auto"; AWS: e.g. "us-east-1"
+s3_access_key_id     = ""
+s3_secret_access_key = ""
+audio_base_url   = ""      # public URL of your bucket (required for R2 / custom CDN)
+# s3_prefix      = ""      # optional key prefix, e.g. "episodes"
+# audio_output_dir = ""    # optional: also save audio to a local directory
 
 [local]
 output_dir = "~/debcast-episodes"

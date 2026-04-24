@@ -1,10 +1,11 @@
 # Implementation Plan: Pipeline and CLI
 
 **Files:**
+
 - `debcast/pipeline.py`
 - `debcast/cli.py`
 
----
+______________________________________________________________________
 
 ## Pipeline
 
@@ -147,6 +148,8 @@ def _build_hosting_provider(name: str, cfg: Config):
         return PodClawHostingProvider(
             api_key=cfg.podclaw.api_key,
             show_id=cfg.podclaw.show_id,
+            audio_output_dir=cfg.podclaw.audio_output_dir,
+            audio_base_url=cfg.podclaw.audio_base_url,
         )
     raise ValueError(f"Unknown hosting provider: {name!r}")
 ```
@@ -158,7 +161,7 @@ def _build_hosting_provider(name: str, cfg: Config):
 - `_spinner` is a thin wrapper around `rich.Progress`. All progress display is in the pipeline; providers are silent.
 - `dry_run` short-circuits after script generation — no TTS, no publishing, no API calls to audio or hosting providers.
 
----
+______________________________________________________________________
 
 ## CLI
 
@@ -274,7 +277,7 @@ debcast = "debcast.cli:app"
 
 `--list` reads from the local RSS feed only. If `hosting = "podclaw"`, it won't list PodClaw episodes. This is acceptable for now — a future version could query the PodClaw API.
 
----
+______________________________________________________________________
 
 ## Pipeline test plan
 

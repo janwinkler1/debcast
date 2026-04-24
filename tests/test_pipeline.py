@@ -77,3 +77,35 @@ def test_unknown_hosting_provider_raises():
 
     with pytest.raises(ValueError, match="Unknown hosting provider"):
         _build_hosting_provider("nonexistent", MagicMock())
+
+
+def test_build_podclaw_hosting_provider_passes_config():
+    from debcast.pipeline import _build_hosting_provider
+
+    cfg = MagicMock()
+    cfg.podclaw.api_key = "pc_live_test"
+    cfg.podclaw.show_id = 7
+    cfg.podclaw.audio_output_dir = "~/debcast-podclaw-audio"
+    cfg.podclaw.audio_base_url = "https://cdn.example.com/debcast"
+    cfg.podclaw.s3_bucket = "debcast-audio"
+    cfg.podclaw.s3_prefix = "episodes"
+    cfg.podclaw.s3_endpoint_url = "https://example.r2.cloudflarestorage.com"
+    cfg.podclaw.s3_region = "auto"
+    cfg.podclaw.s3_access_key_id = "access"
+    cfg.podclaw.s3_secret_access_key = "secret"
+
+    with patch("debcast.providers.hosting.podclaw.PodClawHostingProvider") as provider:
+        _build_hosting_provider("podclaw", cfg)
+
+    provider.assert_called_once_with(
+        api_key="pc_live_test",
+        show_id=7,
+        audio_output_dir="~/debcast-podclaw-audio",
+        audio_base_url="https://cdn.example.com/debcast",
+        s3_bucket="debcast-audio",
+        s3_prefix="episodes",
+        s3_endpoint_url="https://example.r2.cloudflarestorage.com",
+        s3_region="auto",
+        s3_access_key_id="access",
+        s3_secret_access_key="secret",
+    )

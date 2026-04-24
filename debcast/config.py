@@ -41,6 +41,14 @@ class GeminiConfig(BaseModel):
 class PodClawConfig(BaseModel):
     api_key: str = ""
     show_id: int = 0
+    audio_output_dir: str = ""
+    audio_base_url: str = ""
+    s3_bucket: str = ""
+    s3_prefix: str = ""
+    s3_endpoint_url: str = ""
+    s3_region: str = ""
+    s3_access_key_id: str = ""
+    s3_secret_access_key: str = ""
 
 
 class LocalConfig(BaseModel):

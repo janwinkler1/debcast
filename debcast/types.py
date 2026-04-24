@@ -77,6 +77,7 @@ class Episode:
     description: str
     sources: list[str]
     script: Script | None = None
+    audio_url: str | None = None
 
 
 @runtime_checkable
